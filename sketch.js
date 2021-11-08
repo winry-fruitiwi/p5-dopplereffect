@@ -16,7 +16,6 @@ code plan:
  */
 let font
 let tigrex // a Tigrex has a really loud roar!
-let tigrexRoar // nothing is louder than a Tigrex's roar!
 
 function preload() {
     font = loadFont('data/Meiryo-01.ttf')
@@ -26,25 +25,21 @@ function setup() {
     createCanvas(640, 360)
     colorMode(HSB, 360, 100, 100, 100)
     rectMode(CENTER)
-    tigrexRoar = new SoundWave(width / 2, height / 2)
     tigrex = new Speaker(width/2, height/2)
 }
 
 function draw() {
     translate(width/2, height/2)
     background(234, 34, 24)
-    // tigrexRoar.show()
-    // tigrexRoar.update()
 
     tigrex.show()
-    // tigrex.applyForce(new p5.Vector(0, 0.1))
     tigrex.pos = new p5.Vector(100*cos(frameCount/30), 100*sin(frameCount/30))
     tigrex.update()
     tigrex.emit()
 }
 
 class SoundWave {
-    constructor(x, y) {
+    constructor(x, y, h, s, b) {
         // sound waves stay in the same place so we'll leave vel and acc out
         this.pos = new p5.Vector(x, y)
 
@@ -52,11 +47,15 @@ class SoundWave {
         this.lifetime = 100
         // controlled by lifetime
         this.radius = 10
+        // hue, saturation, value
+        this.h = h
+        this.s = s
+        this.b = b
     }
 
     show() {
         noFill()
-        stroke(0, 0, 100, this.lifetime)
+        stroke(this.h, this.s, this.b, this.lifetime)
         circle(this.pos.x, this.pos.y, this.radius * 2)
     }
 
@@ -103,7 +102,7 @@ class Speaker {
             let wave = this.soundWaves[i]
             wave.update()
             if (wave.isExpired()) {
-                this.soundWaves.slice(i, i)
+                this.soundWaves.splice(i, i)
             }
         }
     }
@@ -115,7 +114,12 @@ class Speaker {
 
     emit() {
         if (frameCount % 2 === 0) {
-            this.soundWaves.push(new SoundWave(this.pos.x, this.pos.y))
+            this.soundWaves.push(new SoundWave(
+                this.pos.x,
+                this.pos.y,
+                frameCount % 360,
+                80,
+                80))
         }
     }
 }
